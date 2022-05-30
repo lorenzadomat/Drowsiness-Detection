@@ -1,0 +1,188 @@
+body {
+    margin: 0;
+    /*background-color: #111111;*/
+    font-family: Arial;
+}
+
+.header {
+    width: 100vw;
+    height: 50px;
+    background-color: #4b5766;
+    position: fixed;
+    top: 0;
+    overflow: hidden;
+    z-index: 100;
+}
+
+.header .title {
+    color: #ffffff;
+    position: absolute;
+    left: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+}
+
+.header .title h2 {
+    font-weight: 300;
+}
+
+.header .title label {
+    padding: 0;
+    font-size: 15px;
+}
+
+.header .title span {
+    background-color: #ff4646;
+    border-radius: 25%;
+    margin: auto 15px;
+    padding: 5px 10px;
+    animation: live 2.5s infinite;
+    font-weight: bold;
+    font-size: 11px;
+    box-shadow:
+      0px 0px 0.8px rgba(255, 0, 0, 0.38),
+      0px 0px 2.1px rgba(255, 0, 0, 0.35),
+      0px 0px 4.3px rgba(255, 0, 0, 0.32),
+      0px 0px 8.8px rgba(255, 0, 0, 0.29),
+      0px 0px 24px rgba(255, 0, 0, 0.10);
+}
+
+@keyframes live {
+    from {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.header .menu-bar {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.header .menu-bar a {
+    text-decoration: none;
+    color: #ffffff;
+    margin: 10px;
+}
+
+.header .menu-bar a:hover {
+    text-underline-offset: 5px;
+    text-decoration: underline;
+    text-decoration-color: #ffffff;
+}
+
+.body {
+    width: 100vw;
+    margin-top: 50px;
+}
+
+.body h3 {
+    padding: 20px;
+    font-weight: 400;
+}
+
+.sensorsPage * {
+    box-sizing: border-box;
+}
+
+.container-info {
+    display: flex;
+    position: relative;
+    margin: 50px 40px 0px 40px;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+.small-container {
+    width: 210px;
+    height: 150px;
+    background-color: #eceeee;
+    border-radius: 20px;
+    position: relative;
+    color: black;
+    margin: 2% 1%;
+    overflow: hidden;
+}
+
+.small-container > h3 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 10px;
+    font-weight: 100;
+    font-size: 1em;
+}
+
+.small-container h2 {
+    position: absolute;
+    top: 60%;
+    left: 10%;
+    padding: 0;
+    transform: translateY(-50%);
+    font-size: 1.75em;
+    margin: 0;
+}
+
+.small-container i {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 10px;
+    font-size: 25px;
+}
+
+.container-information-label {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 14px;
+}
+
+#co2-info {
+    display: none;
+    width: 200px;
+    height: 150px;
+    right: 0;
+    top: 200px;
+    background-color: rgba(75, 87, 102, 1);
+    position: absolute;
+    animation: infoSlideIn ease-in .7s ;
+}
+
+.container-wrapper {
+    width: 50vw;
+    display: flex;
+    flex-direction: column;
+    height: 60vh;
+}
+
+.container-graph {
+    width: 90%;
+    height: 98%;
+    background-color: #000000;
+    margin: 1% 5%;
+    border-radius: 20px;
+}
+
+.container-graph h2 {
+    color: #ffffff;
+    margin: 10px;
+    position: absolute;
+}
+
+@media (max-width: 1400px) {
+    .container-wrapper {
+        width: 100vw;
+    }
+}
