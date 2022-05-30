@@ -181,6 +181,14 @@ body {
     position: absolute;
 }
 
+#fps {
+    position: absolute;
+    right: 2%;
+    color: white;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 @media (max-width: 1400px) {
     .container-wrapper {
         width: 100vw;

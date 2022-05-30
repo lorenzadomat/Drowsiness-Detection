@@ -169,6 +169,12 @@ def serveLayout():
                             html.H2('Drowsiness Dashboard'),
                             html.Span('LIVE'),
                         ]
+                    ),
+                    html.Div(
+                        id='fps',
+                        children=[
+                            html.H2(f'FPS: {monitor.fps}'),
+                        ]
                     )
                 ]
             ),
@@ -191,3 +197,10 @@ def serveLayout():
               Input('interval-component', 'n_intervals'))
 def update_body(n):
     return getBody()
+
+@app.callback(Output('fps', 'children'),
+              Input('interval-component', 'n_intervals'))
+def update_body(n):
+    return [
+        html.H2(f'FPS: {monitor.fps}'),
+    ]

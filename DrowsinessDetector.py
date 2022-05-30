@@ -57,7 +57,8 @@ class DrowsinessDetector:
             while cap.isOpened():
                 # calculating frames per second
                 frame_duration = datetime.timestamp(datetime.now()) - timestamp
-                # print('FPS:', 1 / frame_duration)
+                #print('FPS:', 1 / frame_duration)
+                self.monitor.setFPS(1 / frame_duration)
                 timestamp = datetime.timestamp(datetime.now())
 
                 success, image = cap.read()
@@ -110,7 +111,14 @@ class DrowsinessDetector:
         model = tf.keras.models.load_model('drowsinessEyeCnn.model')
         cap = cv2.VideoCapture(0)
         eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+        timestamp = datetime.timestamp(datetime.now())
         while cap.isOpened():
+            # calculating frames per second
+            frame_duration = datetime.timestamp(datetime.now()) - timestamp
+            #print('FPS:', 1 / frame_duration)
+            self.monitor.setFPS(1 / frame_duration)
+            timestamp = datetime.timestamp(datetime.now())
+
             success, image = cap.read()
 
             eyes = eye_cascade.detectMultiScale(image, minSize=(40, 40), maxSize=(50, 50))

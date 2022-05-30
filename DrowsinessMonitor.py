@@ -36,6 +36,8 @@ class DrowsinessMonitor:
             cls.mouthState = States.CLOSED
             cls.mouthOpeningTimestamp = datetime.now()
             cls.mouthAggregation = pd.DataFrame(columns=['timestamp', 'sum', 'count'])
+
+            cls.fps = 0
         return cls._instance
 
     def setLeftEyeState(self, state):
@@ -69,6 +71,9 @@ class DrowsinessMonitor:
                 self.mouthDataFrame = self.mouthDataFrame.append({'timestamp': self.mouthOpeningTimestamp, 'duration': duration.total_seconds()}, ignore_index=True)
                 self.mouthAggregation = self.getAggregatedDataframe(self.mouthDataFrame, 5)
             self.mouthState = States.CLOSED
+
+    def setFPS(self, fps):
+        self.fps = fps
 
     def plot(self):
         plt.plot_date(plt_dates.date2num(self.leftEyeDataFrame['timestamp']),  self.leftEyeDataFrame['duration'])
