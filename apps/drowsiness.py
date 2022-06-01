@@ -53,29 +53,10 @@ def getMouthFigure():
     return figure
 
 
-def isTired():
-    if (len(monitor.leftEyeAggregation) > 1 and (monitor.leftEyeAggregation['count'].iloc[-2] > 25 or monitor.leftEyeAggregation['sum'].iloc[-2] > 10)) or \
-            len(monitor.leftEyeAggregation) > 0 and monitor.leftEyeAggregation['count'].iloc[-1] > 25:
-        return True
-    if (len(monitor.rightEyeAggregation) > 1 and (monitor.rightEyeAggregation['count'].iloc[-2] > 25 or monitor.rightEyeAggregation['sum'].iloc[-2] > 10)) or \
-            len(monitor.rightEyeAggregation) > 0 and monitor.rightEyeAggregation['count'].iloc[-1] > 25:
-        return True
-    if (len(monitor.mouthAggregation) > 1 and monitor.mouthAggregation['sum'].iloc[-2] > 7) or \
-            len(monitor.mouthAggregation) > 0 and monitor.mouthAggregation['sum'].iloc[-1] > 7:
-        return True
-    return False
-
-def isSleeping():
-    if monitor.leftEyeState == States.CLOSED and len(monitor.leftEyeAggregation) > 0 and monitor.leftEyeAggregation['sum'].iloc[-1] > 10 and \
-            monitor.rightEyeState == States.CLOSED and len(monitor.rightEyeAggregation) > 0 and monitor.rightEyeAggregation['sum'].iloc[-1] > 10:
-        return True
-    return False
-
-
 def getStatus():
-    if isSleeping():
+    if monitor.isSleeping():
         return 'Am Schlafen'
-    elif isTired():
+    elif monitor.isTired():
         return 'Müde'
     else:
         return 'Nicht müde'
