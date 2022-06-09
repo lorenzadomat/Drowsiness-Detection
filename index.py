@@ -5,7 +5,6 @@ from threading import Thread
 from DrowsinessDetector import DrowsinessDetector
 
 from apps import drowsiness
-
 from app import app
 
 app.layout = html.Div([
@@ -15,14 +14,16 @@ app.layout = html.Div([
 
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
-def display_page(pathname):
+def display_page():
     return drowsiness.serveLayout()
 
 
 if __name__ == '__main__':
     detector = DrowsinessDetector()
+    # start dash Website on separate thread
     thread1 = Thread(target=app.run_server)
-
     thread1.start()
+
+    # start drowsiness detector with Face Map or CNN
     detector.runWithFaceMap()
-    #detector.runWithOwnImplementation()
+    #detector.runWithCNN()

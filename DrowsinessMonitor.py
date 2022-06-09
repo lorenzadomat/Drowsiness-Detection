@@ -1,15 +1,16 @@
 import pandas as pd
 from enum import Enum
 from datetime import datetime
-import matplotlib.pyplot as plt
-import matplotlib.dates as plt_dates
 from PushNotification import sendPushNotification
+
 
 class States(Enum):
     OPEN = 1
     CLOSED = 2
 
 
+# The DrowsinessMonitor is monitoring all eye and mouth changes and
+# aggregates them to decide if someone is tired, not tired or sleeping
 class DrowsinessMonitor:
     _instance = None
 
@@ -75,6 +76,8 @@ class DrowsinessMonitor:
                 self.mouthAggregation = self.getAggregatedDataframe(self.mouthDataFrame, 5)
             self.mouthState = States.CLOSED
 
+    # checks if in the last two minutes the blink rate is above 25 or the yawn rate is above 7 per minute
+    # threshold can be adapted
     def isTired(self):
         tired = False
         if (len(self.leftEyeAggregation) > 1 and (
@@ -92,7 +95,7 @@ class DrowsinessMonitor:
             tired = True
 
         if tired and self.tiredNotificationSend is False:
-            sendPushNotification('Müdigkeitserkennung', 'Du scheinst müde zu sein. Bitte nehme eine Auszeit!')
+            sendPushNotification('Müdigkeitserkennung', 'Du scheinst müde zu sein. Bitte nimm eine Auszeit!')
             self.tiredNotificationSend = True
 
         if not tired:
@@ -100,13 +103,14 @@ class DrowsinessMonitor:
 
         return tired
 
+    # checks if both eyes have been closed for at least 10 seconds
     def isSleeping(self):
         sleeping = False
-        if self.leftEyeState == States.CLOSED and len(self.leftEyeAggregation) > 0 and \
-                self.leftEyeAggregation['sum'].iloc[-1] > 10 and \
-                self.rightEyeState == States.CLOSED and len(self.rightEyeAggregation) > 0 and \
-                self.rightEyeAggregation['sum'].iloc[-1] > 10:
-            sleeping = True
+        if self.leftEyeState == States.CLOSED and self.rightEyeState == States.CLOSED:
+            leftDuration = datetime.now() - self.leftEyeClosingTimestamp
+            rightDuration = datetime.now() - self.rightEyeClosingTimestamp
+            if leftDuration.total_seconds() > 10 and rightDuration.total_seconds() > 10:
+                sleeping = True
 
         if sleeping and self.sleepingNotificationSend is False:
             sendPushNotification('Müdigkeitserkennung', 'Du scheinst zu schlafen. Schlaf gut!')
@@ -120,15 +124,7 @@ class DrowsinessMonitor:
     def setFPS(self, fps):
         self.fps = fps
 
-    def plot(self):
-        plt.plot_date(plt_dates.date2num(self.leftEyeDataFrame['timestamp']),  self.leftEyeDataFrame['duration'])
-        plt.show()
-        plt.plot_date(plt_dates.date2num(self.rightEyeDataFrame['timestamp']),  self.rightEyeDataFrame['duration'])
-        plt.show()
-        plt.plot_date(plt_dates.date2num(self.mouthDataFrame['timestamp']),  self.mouthDataFrame['duration'])
-        plt.show()
-
-
+    # aggregate features for each minute
     def getAggregatedDataframe(self, dataframe, timespan):
         dataframe = dataframe.groupby(pd.Grouper(key='timestamp', freq=f'{timespan}min')).agg(sum=('duration', 'sum'), count=('duration', 'count'))
         return dataframe.reset_index(level=0)

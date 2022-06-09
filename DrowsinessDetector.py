@@ -22,29 +22,6 @@ class DrowsinessDetector:
         self.monitor = DrowsinessMonitor.instance()
         pass
 
-    def updateStates(self, landmarks):
-        self.monitor.setLeftEyeState(self.getLeftEyeState(landmarks.landmark))
-        self.monitor.setRightEyeState(self.getRightEyeState(landmarks.landmark))
-        self.monitor.setMouthState(self.getMouthState(landmarks.landmark))
-
-    # distance between 386 and 374
-    def getLeftEyeState(self, landmarks):
-        if landmarks[374].y - landmarks[386].y < 0.005:
-            return States.CLOSED
-        return States.OPEN
-
-    # distance between 159 and 144
-    def getRightEyeState(self, landmarks):
-        if landmarks[144].y - landmarks[159].y < 0.005:
-            return States.CLOSED
-        return States.OPEN
-
-    # distance between 81 and 87
-    def getMouthState(self, landmarks):
-        if landmarks[87].y - landmarks[81].y > 0.07:
-            return States.OPEN
-        return States.CLOSED
-
     def runWithFaceMap(self):
         timestamp = datetime.timestamp(datetime.now())
 
@@ -57,7 +34,6 @@ class DrowsinessDetector:
             while cap.isOpened():
                 # calculating frames per second
                 frame_duration = datetime.timestamp(datetime.now()) - timestamp
-                #print('FPS:', 1 / frame_duration)
                 self.monitor.setFPS(1 / frame_duration)
                 timestamp = datetime.timestamp(datetime.now())
 
@@ -86,20 +62,6 @@ class DrowsinessDetector:
                             connections=mp_face_mesh.FACEMESH_FACE_OVAL,
                             connection_drawing_spec=mp_drawing_styles
                                 .get_default_face_mesh_tesselation_style())
-                        # mp_drawing.draw_landmarks(
-                        #     image=image,
-                        #     landmark_list=face_landmarks,
-                        #     connections=mp_face_mesh.FACEMESH_CONTOURS,
-                        #     landmark_drawing_spec=None,
-                        #     connection_drawing_spec=mp_drawing_styles
-                        #         .get_default_face_mesh_contours_style())
-                        # mp_drawing.draw_landmarks(
-                        #     image=image,
-                        #     landmark_list=face_landmarks,
-                        #     connections=mp_face_mesh.FACEMESH_IRISES,
-                        #     landmark_drawing_spec=None,
-                        #     connection_drawing_spec=mp_drawing_styles
-                        #        .get_default_face_mesh_iris_connections_style())
                 # Flip the image horizontally for a selfie-view display.
                 cv2.imshow('MediaPipe Face Mesh', cv2.flip(image, 1))
                 if cv2.waitKey(5) & 0xFF == 27:
@@ -107,48 +69,64 @@ class DrowsinessDetector:
 
         cap.release()
 
-    def runWithOwnImplementation(self):
+    def runWithCNN(self):
+        timestamp = datetime.timestamp(datetime.now())
         model = tf.keras.models.load_model('drowsinessEyeCnn.model')
         cap = cv2.VideoCapture(0)
         eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-        timestamp = datetime.timestamp(datetime.now())
+        iCounter = 0
         while cap.isOpened():
-            # calculating frames per second
+
             frame_duration = datetime.timestamp(datetime.now()) - timestamp
-            #print('FPS:', 1 / frame_duration)
             self.monitor.setFPS(1 / frame_duration)
             timestamp = datetime.timestamp(datetime.now())
 
             success, image = cap.read()
 
-            eyes = eye_cascade.detectMultiScale(image, minSize=(40, 40), maxSize=(50, 50))
             grayFrame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            left = True
+            eyes = eye_cascade.detectMultiScale(grayFrame, 1.3, 5)
             for (ex, ey, ew, eh) in eyes:
-                if left:
-                    left_eye = grayFrame[ey: ey + eh, ex: ex + ew]
-                    left_eye = cv2.resize(left_eye, (IMG_SIZE, IMG_SIZE))
-                    cv2.rectangle(image, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 6)
-                    cv2.imshow('Left Eye', left_eye)
-                    left_eye = np.array(left_eye).reshape(-1, IMG_SIZE, IMG_SIZE,
-                                                          1)  # -1 is default, last 1 for grey scale
-                    pred = model.predict(left_eye)
-                    left = False
-                else:
-                    right_eye = grayFrame[ey: ey + eh, ex: ex + ew]
-                    right_eye = cv2.resize(right_eye, (IMG_SIZE, IMG_SIZE))
-                    cv2.rectangle(image, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 6)
-                    cv2.imshow('Right Eye', right_eye)
-                    right_eye = np.array(right_eye).reshape(-1, IMG_SIZE, IMG_SIZE,
-                                                            1)  # -1 is default, last 1 for grey scale
-                    pred = model.predict(right_eye)
-                    left = True
+                cv2.rectangle(image, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 5)
+                eye = grayFrame[ey:ey + eh, ex:ex + ew]
+                resized_eye = cv2.resize(eye, (IMG_SIZE, IMG_SIZE))
+                cv2.imshow('Eye', resized_eye)
+                reshaped_eye = np.array(resized_eye).reshape(-1, IMG_SIZE, IMG_SIZE, 1)
+                pred = model.predict(reshaped_eye)
 
                 if (pred[0, 0] > 0.9):
+                    self.monitor.setLeftEyeState(States.CLOSED)
+                    self.monitor.setRightEyeState(States.CLOSED)
                     print('eyes closed')
-
+                elif iCounter > 10:
+                    self.monitor.setLeftEyeState(States.OPEN)
+                    self.monitor.setRightEyeState(States.OPEN)
+                    iCounter = 0
+                else:
+                    iCounter += 1
             cv2.imshow('Video Stream', image)
 
             if cv2.waitKey(5) & 0xFF == 27:
                 break
 
+    def updateStates(self, landmarks):
+        self.monitor.setLeftEyeState(self.getLeftEyeState(landmarks.landmark))
+        self.monitor.setRightEyeState(self.getRightEyeState(landmarks.landmark))
+        self.monitor.setMouthState(self.getMouthState(landmarks.landmark))
+
+    # distance between 386 and 374
+    def getLeftEyeState(self, landmarks):
+        if landmarks[374].y - landmarks[386].y < 0.005:
+            return States.CLOSED
+        return States.OPEN
+
+    # distance between 159 and 144
+    def getRightEyeState(self, landmarks):
+        if landmarks[144].y - landmarks[159].y < 0.005:
+            return States.CLOSED
+        return States.OPEN
+
+    # distance between 81 and 87
+    def getMouthState(self, landmarks):
+        if landmarks[87].y - landmarks[81].y > 0.07:
+            return States.OPEN
+        return States.CLOSED
