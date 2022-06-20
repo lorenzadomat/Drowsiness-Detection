@@ -25,5 +25,5 @@ if __name__ == '__main__':
     thread1.start()
 
     # start drowsiness detector with Face Map or CNN
-    #detector.runWithFaceMap()
-    detector.runWithCNN()
+    detector.runWithFaceMap()
+    #detector.runWithCNN()
