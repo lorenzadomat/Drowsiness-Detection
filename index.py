@@ -14,7 +14,7 @@ app.layout = html.Div([
 
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
-def display_page():
+def display_page(pathname):
     return drowsiness.serveLayout()
 
 
@@ -25,5 +25,5 @@ if __name__ == '__main__':
     thread1.start()
 
     # start drowsiness detector with Face Map or CNN
-    detector.runWithFaceMap()
-    #detector.runWithCNN()
+    #detector.runWithFaceMap()
+    detector.runWithCNN()
